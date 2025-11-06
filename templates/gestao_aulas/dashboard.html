@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - ProAgenda</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --secondary-color: #3b82f6;
+        --accent-color: #06b6d4;
+        --dark-blue: #1e40af;
+        --light-blue: #dbeafe;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f9ff;
+      }
+
+      .logo {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-decoration: none;
+      }
+
+      .logo-icon {
+        font-size: 1.8rem;
+      }
+
+      .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .sidebar {
+        width: 250px;
+        background: white;
+        transition: width 0.3s ease;
+        position: fixed;
+        height: calc(100vh - 76px);
+        z-index: 99;
+      }
+
+      .sidebar.collapsed {
+        width: 70px;
+      }
+
+      .sidebar.collapsed .nav-text {
+        opacity: 0;
+        width: 0;
+      }
+
+      .nav-item {
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+      }
+
+      .nav-item.active {
+        background-color: var(--light-blue);
+        color: var(--primary-color) !important;
+        border-left-color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      .nav-item:hover {
+        background-color: var(--light-blue);
+        color: var(--primary-color) !important;
+      }
+
+      .nav-text {
+        transition: opacity 0.3s ease;
+      }
+
+      .main-content {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+      }
+
+      .main-content.expanded {
+        margin-left: 70px;
+      }
+
+      .welcome-section {
+        background: var(--gradient-primary);
+        border-radius: 15px;
+      }
+
+      .stat-card {
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      .icon-students { background: var(--success-color); }
+      .icon-hours { background: var(--accent-color); }
+      .icon-pending { background: var(--warning-color); }
+      .icon-revenue { background: var(--primary-color); }
+
+      .students-table {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .hours-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+      }
+
+      .hours-full { background-color: #dcfce7; color: #166534; }
+      .hours-medium { background-color: #fef3c7; color: #92400e; }
+      .hours-low { background-color: #fee2e2; color: #991b1b; }
+
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        color: #1f2937;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      .btn-icon:hover {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .nav-item .tooltip {
+        visibility: hidden;
+        background-color: #1f2937;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 0.5rem;
+        position: absolute;
+        z-index: 1;
+        left: 70px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .sidebar.collapsed .nav-item:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      footer {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+      }
+
+      footer.expanded {
+        margin-left: 70px;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 0;
+        }
+
+        .sidebar:not(.collapsed) {
+          width: 100%;
+          height: 100vh;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 1000;
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        footer {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky-top py-3">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-primary border-0" id="menuToggle">
+              <i class="bi bi-list"></i>
+            </button>
+            <a href="{% url 'dashboard' %}" class="logo d-flex align-items-center gap-2">
+              <span class="logo-icon">📚</span>
+              <span class="logo-text fs-4">ProAgenda</span>
+            </a>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="text-end">
+              <div class="fw-semibold">Prof. {{ request.user.first_name }} {{ request.user.last_name }}</div>
+              <small class="text-muted">{{ request.user.get_disciplinas_display }}</small>
+            </div>
+            <div class="user-avatar rounded-circle">
+              {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="d-flex">
+      <!-- Sidebar -->
+      <aside class="sidebar bg-white shadow-sm" id="sidebar">
+        <nav class="p-3">
+          <a href="{% url 'dashboard' %}" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded active">
+            <i class="bi bi-house-fill"></i>
+            <span class="nav-text">Dashboard</span>
+            <span class="tooltip">Dashboard</span>
+          </a>
+          <a href="{% url 'dashboard' %}" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded">
+            <i class="bi bi-people-fill"></i>
+            <span class="nav-text">Meus Alunos</span>
+            <span class="tooltip">Meus Alunos</span>
+          </a>
+          <a href="#" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded">
+            <i class="bi bi-gear-fill"></i>
+            <span class="nav-text">Configurações</span>
+            <span class="tooltip">Configurações</span>
+          </a>
+          <a href="{% url 'logout' %}" 
+            class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded" 
+            id="logout-link">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="nav-text">Sair</span>
+            <span class="tooltip">Sair</span>
+          </a>
+
+          <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: none;">
+              {% csrf_token %}
+          </form>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content flex-grow-1 p-4" id="mainContent">
+        <!-- Welcome Section -->
+        <section class="welcome-section text-white p-4 mb-4">
+          <h1 class="h3 fw-bold">Bem-vindo de volta, Professor(a) {{ request.user.first_name }}!</h1>
+          <p class="mb-0">Hoje é {{ today|date:"l, d \d\e F \d\e Y" }}</p>
+        </section>
+
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="stat-card bg-white p-3 shadow-sm h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon icon-students me-3">
+                  <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ total_alunos_ativos }}</h3>
+                  <small class="text-muted">Alunos Ativos</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="stat-card bg-white p-3 shadow-sm h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon icon-hours me-3">
+                  <i class="bi bi-clock-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ total_horas_ministradas }}</h3>
+                  <small class="text-muted">Horas Ministradas</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="stat-card bg-white p-3 shadow-sm h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon icon-pending me-3">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ aulas_pendentes }}</h3>
+                  <small class="text-muted">Aulas Pendentes</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="stat-card bg-white p-3 shadow-sm h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon icon-revenue me-3">
+                  <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ receita_mes }}</h3>
+                  <small class="text-muted">Receita do Mês</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+          <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+            <i class="bi bi-plus-lg"></i>
+            Adicionar Aluno
+          </button>
+          <button class="btn btn-success d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addAulaModal">
+            <i class="bi bi-play-circle"></i>
+            Lançar Aula
+          </button>
+        </div>
+
+        <!-- Students Table -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 fw-bold mb-0">Meus Alunos</h2>
+          <span class="text-muted">{{ total_alunos_ativos }} aluno{{ total_alunos_ativos|pluralize:"s" }}</span>
+        </div>
+
+        <div class="students-table bg-white shadow-sm mb-4">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Aluno</th>
+                  <th>Disciplina</th>
+                  <th class="d-none d-md-table-cell">Horas Contratadas</th>
+                  <th class="d-none d-md-table-cell">Saldo de Horas</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for aluno in alunos %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="student-avatar">
+                        {{ aluno.nome|first }}{{ aluno.sobrenome|first }}
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ aluno.nome }} {{ aluno.sobrenome }}</div>
+                        <small class="text-muted">{{ aluno.email|default:"Sem email" }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ aluno.get_disciplina_display }}</td>
+                  <td class="d-none d-md-table-cell">{{ aluno.horas_contratadas|floatformat:0 }}h</td>
+                  <td class="d-none d-md-table-cell">
+                    <span class="badge hours-full">{{ aluno.saldo_horas|floatformat:1 }}h restantes</span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="#" class="btn-icon" title="Lançar aula" data-bs-toggle="modal" data-bs-target="#addAulaModal" data-aluno-id="{{ aluno.id }}" data-aluno-nome="{{ aluno.nome }} {{ aluno.sobrenome }}">
+                        <i class="bi bi-play-fill"></i>
+                      </a>
+                      <a href="#" class="btn-icon" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <a href="#" class="btn-icon" title="Histórico">
+                        <i class="bi bi-clock-history"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">
+                    Você ainda não cadastrou nenhum aluno. Clique em "Adicionar Aluno" para começar!
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Classes -->
+        <h2 class="h4 fw-bold mb-3">Aulas Recentes</h2>
+        <div class="recent-classes bg-white shadow-sm rounded p-3">
+          
+          {% if aulas_recentes %}
+            <div class="list-group list-group-flush">
+              {% for aula in aulas_recentes %}
+                <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                  <div>
+                    <div class="fw-semibold">{{ aula.aluno.nome }} {{ aula.aluno.sobrenome }}</div>
+                    <small class="text-muted">{{ aula.assunto|default:"Sem assunto" }} - {{ aula.duracao|floatformat:1 }}h</small>
+                  </div>
+                  <small class="text-muted">{{ aula.data_aula|date:"d/m/Y" }}</small>
+                </div>
+              {% endfor %}
+            </div>
+            
+          {% else %}
+            <div class="text-center text-muted py-3">Nenhuma aula lançada ainda.</div>
+          {% endif %}
+          
+        </div>
+      </main>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Adicionar Novo Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'dashboard' %}">
+            {% csrf_token %}
+
+            <input type="hidden" name="action" value="add_aluno">
+
+            <div class="modal-body">
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+              </div>
+              {% endif %}
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="id_nome" class="form-label">Nome</label>
+                  <input type="text" name="nome" id="id_nome" class="form-control" required 
+                         placeholder="Nome do aluno" value="{{ form.nome.value|default:'' }}">
+                  {% if form.nome.errors %}
+                  <div class="text-danger small">{{ form.nome.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_sobrenome" class="form-label">Sobrenome</label>
+                  <input type="text" name="sobrenome" id="id_sobrenome" class="form-control" required 
+                         placeholder="Sobrenome do aluno" value="{{ form.sobrenome.value|default:'' }}">
+                  {% if form.sobrenome.errors %}
+                  <div class="text-danger small">{{ form.sobrenome.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label for="id_email" class="form-label">E-mail</label>
+                  <input type="email" name="email" id="id_email" class="form-control" 
+                         placeholder="email@exemplo.com" value="{{ form.email.value|default:'' }}">
+                  {% if form.email.errors %}
+                  <div class="text-danger small">{{ form.email.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label for="id_telefone" class="form-label">Telefone</label>
+                  <input type="tel" name="telefone" id="id_telefone" class="form-control" 
+                         placeholder="(11) 99999-9999" value="{{ form.telefone.value|default:'' }}">
+                  {% if form.telefone.errors %}
+                  <div class="text-danger small">{{ form.telefone.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_disciplina" class="form-label">Disciplina</label>
+                  <select name="disciplina" id="id_disciplina" class="form-select" required>
+                    <option value="">Selecione uma disciplina</option>
+                    {% for value, name in form.disciplina.field.choices %}
+                      {% if value != '' %}
+                      <option value="{{ value }}" {% if form.disciplina.value == value %}selected{% endif %}>
+                        {{ name }}
+                      </option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  {% if form.disciplina.errors %}
+                  <div class="text-danger small">{{ form.disciplina.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_horas_contratadas" class="form-label">Horas Contratadas</label>
+                  <input type="number" name="horas_contratadas" id="id_horas_contratadas" 
+                         class="form-control" required min="1" max="100" placeholder="10"
+                         value="{{ form.horas_contratadas.value|default:'' }}">
+                  {% if form.horas_contratadas.errors %}
+                  <div class="text-danger small">{{ form.horas_contratadas.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Cadastrar Aluno</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Aula Modal -->
+    <div class="modal fade" id="addAulaModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Lançar Nova Aula</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'dashboard' %}">
+            {% csrf_token %}
+
+            <input type="hidden" name="action" value="lancar_aula">
+
+            <div class="modal-body">
+              {% if aula_form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ aula_form.non_field_errors }}
+              </div>
+              {% endif %}
+
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="id_aluno" class="form-label">Aluno</label>
+                  <select name="aluno" id="id_aluno" class="form-select" required>
+                    <option value="">Selecione um aluno</option>
+                    {% for aluno in alunos %}
+                    <option value="{{ aluno.id }}" data-saldo="{{ aluno.saldo_horas }}">
+                      {{ aluno.nome }} {{ aluno.sobrenome }} - {{ aluno.get_disciplina_display }} (Saldo: {{ aluno.saldo_horas }}h)
+                    </option>
+                    {% endfor %}
+                  </select>
+                  {% if aula_form.aluno.errors %}
+                  <div class="text-danger small">{{ aula_form.aluno.errors }}</div>
+                  {% endif %}
+                  <div class="form-text" id="saldo-info"></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="id_data_aula" class="form-label">Data da Aula</label>
+                  <input type="date" name="data_aula" id="id_data_aula" class="form-control" required 
+                         value="{{ aula_form.data_aula.value|default:'' }}">
+                  {% if aula_form.data_aula.errors %}
+                  <div class="text-danger small">{{ aula_form.data_aula.errors }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label for="id_duracao" class="form-label">Duração (horas)</label>
+                  <input type="number" name="duracao" id="id_duracao" class="form-control" required 
+                         min="0.5" max="8" step="0.5" placeholder="1.5"
+                         value="{{ aula_form.duracao.value|default:'' }}">
+                  {% if aula_form.duracao.errors %}
+                  <div class="text-danger small">{{ aula_form.duracao.errors }}</div>
+                  {% endif %}
+                  <div class="form-text">Duração em horas (ex: 1.5 para 1 hora e 30 minutos)</div>
+                </div>
+
+                <div class="col-12">
+                  <label for="id_assunto" class="form-label">Assunto/Conteúdo</label>
+                  <textarea name="assunto" id="id_assunto" class="form-control" rows="4" 
+                            placeholder="Descreva o conteúdo abordado na aula...">{{ aula_form.assunto.value|default:'' }}</textarea>
+                  {% if aula_form.assunto.errors %}
+                  <div class="text-danger small">{{ aula_form.assunto.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success">Lançar Aula</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const footer = document.getElementById('footer');
+
+        // Menu toggle functionality
+        menuToggle.addEventListener('click', function () {
+          sidebar.classList.toggle('collapsed');
+          mainContent.classList.toggle('expanded');
+          footer.classList.toggle('expanded');
+
+          const icon = menuToggle.querySelector('i');
+          if (sidebar.classList.contains('collapsed')) {
+            icon.classList.remove('bi-list');
+            icon.classList.add('bi-chevron-right');
+          } else {
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-list');
+          }
+        });
+
+        // Close menu when clicking outside (mobile)
+        document.addEventListener('click', function (event) {
+          if (window.innerWidth <= 768) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickInsideMenuToggle = menuToggle.contains(event.target);
+
+            if (!isClickInsideSidebar && !isClickInsideMenuToggle && !sidebar.classList.contains('collapsed')) {
+              sidebar.classList.add('collapsed');
+              mainContent.classList.add('expanded');
+              footer.classList.add('expanded');
+              const icon = menuToggle.querySelector('i');
+              icon.classList.remove('bi-list');
+              icon.classList.add('bi-chevron-right');
+            }
+          }
+        });
+
+        // Logout functionality
+        document.addEventListener('DOMContentLoaded', function() {
+          var logoutLink = document.getElementById('logout-link');
+
+          if (logoutLink) {
+              logoutLink.addEventListener('click', function(event) {
+                  event.preventDefault();                 
+                  document.getElementById('logout-form').submit();
+              });
+          }
+        });
+
+        // Aula Modal functionality
+        const aulaModal = document.getElementById('addAulaModal');
+        const alunoSelect = document.getElementById('id_aluno');
+        const duracaoInput = document.getElementById('id_duracao');
+        const saldoInfo = document.getElementById('saldo-info');
+
+        // Update saldo info when aluno is selected
+        alunoSelect.addEventListener('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const saldo = selectedOption.getAttribute('data-saldo');
+          
+          if (saldo) {
+            saldoInfo.textContent = `Saldo disponível: ${saldo}h`;
+            saldoInfo.className = 'form-text text-success';
+          } else {
+            saldoInfo.textContent = '';
+          }
+        });
+
+        // Check saldo when duracao changes
+        duracaoInput.addEventListener('input', function() {
+          const selectedOption = alunoSelect.options[alunoSelect.selectedIndex];
+          const saldo = parseFloat(selectedOption.getAttribute('data-saldo'));
+          const duracao = parseFloat(this.value);
+
+          if (saldo && duracao) {
+            if (duracao > saldo) {
+              saldoInfo.textContent = `Atenção: Duração (${duracao}h) excede o saldo disponível (${saldo}h)`;
+              saldoInfo.className = 'form-text text-danger fw-bold';
+            } else {
+              saldoInfo.textContent = `Saldo disponível: ${saldo}h - Após esta aula: ${(saldo - duracao).toFixed(1)}h`;
+              saldoInfo.className = 'form-text text-success';
+            }
+          }
+        });
+
+        // Pre-select aluno when opening modal from table action
+        aulaModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          if (button && button.hasAttribute('data-aluno-id')) {
+            const alunoId = button.getAttribute('data-aluno-id');
+            const alunoNome = button.getAttribute('data-aluno-nome');
+            
+            // Set the select value
+            alunoSelect.value = alunoId;
+            
+            // Trigger change event to update saldo info
+            const event = new Event('change');
+            alunoSelect.dispatchEvent(event);
+          }
+        });
+
+        // Set today's date as default for data_aula
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('id_data_aula').value = today;
+      });
+    </script>
+  </body>
+</html>
