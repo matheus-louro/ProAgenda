@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meus Alunos - ProAgenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --secondary-color: #3b82f6;
+        --accent-color: #06b6d4;
+        --dark-blue: #1e40af;
+        --light-blue: #dbeafe;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f9ff;
+      }
+
+      .logo {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-decoration: none;
+      }
+
+      .logo-icon {
+        font-size: 1.8rem;
+      }
+
+      .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .sidebar {
+        width: 250px;
+        background: white;
+        transition: width 0.3s ease;
+        position: fixed;
+        height: calc(100vh - 76px);
+        z-index: 99;
+      }
+
+      .sidebar.collapsed {
+        width: 70px;
+      }
+
+      .sidebar.collapsed .nav-text {
+        opacity: 0;
+        width: 0;
+      }
+
+      .nav-item {
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+      }
+
+      .nav-item.active {
+        background-color: var(--light-blue);
+        color: var(--primary-color) !important;
+        border-left-color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      .nav-item:hover {
+        background-color: var(--light-blue);
+        color: var(--primary-color) !important;
+      }
+
+      .nav-text {
+        transition: opacity 0.3s ease;
+      }
+
+      .main-content {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+      }
+
+      .main-content.expanded {
+        margin-left: 70px;
+      }
+
+      .page-header {
+        background: var(--gradient-primary);
+        border-radius: 15px;
+        color: white;
+      }
+
+      .students-table {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .hours-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+      }
+
+      .hours-full { background-color: #dcfce7; color: #166534; }
+      .hours-medium { background-color: #fef3c7; color: #92400e; }
+      .hours-low { background-color: #fee2e2; color: #991b1b; }
+
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        color: #1f2937;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      .btn-icon:hover {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+      }
+
+      .nav-item .tooltip {
+        visibility: hidden;
+        background-color: #1f2937;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 0.5rem;
+        position: absolute;
+        z-index: 1;
+        left: 70px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .sidebar.collapsed .nav-item:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .search-box {
+        width: 500px;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 0;
+        }
+
+        .sidebar:not(.collapsed) {
+          width: 100%;
+          height: 100vh;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 1000;
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        footer {
+          margin-left: 0;
+        }
+
+        .search-box {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky-top py-3">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-primary border-0" id="menuToggle">
+              <i class="bi bi-list"></i>
+            </button>
+            <a href="{% url 'dashboard' %}" class="logo d-flex align-items-center gap-2">
+              <span class="logo-icon">📚</span>
+              <span class="logo-text fs-4">ProAgenda</span>
+            </a>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="text-end">
+              <div class="fw-semibold">Prof. {{ request.user.first_name }} {{ request.user.last_name }}</div>
+              <small class="text-muted">{{ request.user.get_disciplinas_display }}</small>
+            </div>
+            <div class="user-avatar rounded-circle">
+              {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="d-flex">
+      <!-- Sidebar -->
+      <aside class="sidebar bg-white shadow-sm" id="sidebar">
+        <nav class="p-3">
+          <a href="{% url 'dashboard' %}" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded">
+            <i class="bi bi-house-fill"></i>
+            <span class="nav-text">Dashboard</span>
+            <span class="tooltip">Dashboard</span>
+          </a>
+          <a href="{% url 'meus_alunos' %}" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded active">
+            <i class="bi bi-people-fill"></i>
+            <span class="nav-text">Meus Alunos</span>
+            <span class="tooltip">Meus Alunos</span>
+          </a>
+          <a href="{% url 'logout' %}" 
+            class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded" 
+            id="logout-link">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="nav-text">Sair</span>
+            <span class="tooltip">Sair</span>
+          </a>
+
+          <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: none;">
+              {% csrf_token %}
+          </form>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content flex-grow-1 p-4" id="mainContent">
+        <!-- Page Header -->
+        <section class="page-header text-white p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 fw-bold mb-2">Meus Alunos</h1>
+              <p class="mb-0">Gerencie todos os seus alunos em um só lugar</p>
+            </div>
+            <button class="btn btn-light d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+              <i class="bi bi-plus-lg"></i>
+              Novo Aluno
+            </button>
+          </div>
+        </section>
+
+        <!-- Status -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="bg-white p-3 shadow-sm rounded h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3">
+                  <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ total_alunos }}</h3>
+                  <small class="text-muted">Total de Alunos</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="bg-white p-3 shadow-sm rounded h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3">
+                  <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ alunos_ativos }}</h3>
+                  <small class="text-muted">Alunos Ativos</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="bg-white p-3 shadow-sm rounded h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" >
+                  <i class="bi bi-pause-circle-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ alunos_inativos }}</h3>
+                  <small class="text-muted">Alunos Inativos</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="bg-white p-3 shadow-sm rounded h-100">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" >
+                  <i class="bi bi-clock-fill"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0">{{ total_horas }}</h3>
+                  <small class="text-muted">Horas Totais</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search and Actions -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div class="search-box">
+            <div class="input-group">
+              <span class="input-group-text bg-white">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" class="form-control" placeholder="Buscar aluno por nome, email ou disciplina..." id="searchInput">
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <div class="dropdown">
+              <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-filter"></i> Filtrar
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" data-filter="all">Todos os alunos</a></li>
+                <li><a class="dropdown-item" href="#" data-filter="ativo">Apenas ativos</a></li>
+                <li><a class="dropdown-item" href="#" data-filter="inativo">Apenas inativos</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alunos Table -->
+        <div class="students-table bg-white shadow-sm">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0" id="studentsTable">
+              <thead class="table-light">
+                <tr>
+                  <th>Aluno</th>
+                  <th>Contato</th>
+                  <th>Disciplina</th>
+                  <th class="text-center">Horas Contratadas</th>
+                  <th class="text-center">Saldo de Horas</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for aluno in alunos %}
+                <tr data-status="{{ aluno.ativo|yesno:'ativo,inativo' }}" data-disciplina="{{ aluno.get_disciplina_display }}">
+                  
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="student-avatar">
+                        {{ aluno.nome|first }}{{ aluno.sobrenome|first }}
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ aluno.nome }} {{ aluno.sobrenome }}</div>
+                        
+                        {% if aluno.dia_semana is not None %}
+                          <div class="small text-primary">
+                            <i class="bi bi-calendar-event"></i> 
+                            {{ aluno.get_dia_semana_display }} às {{ aluno.horario_fixo|time:"H:i" }}
+                          </div>
+                        {% endif %}
+                        </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <div class="small">{{ aluno.email|default:"Sem email" }}</div>
+                      <div class="small text-muted">{{ aluno.telefone|default:"Sem telefone" }}</div>
+                    </div>
+                  </td>
+                  <td>{{ aluno.get_disciplina_display }}</td>
+                  <td class="text-center">{{ aluno.horas_contratadas|floatformat:0 }}h</td>
+                  <td class="text-center">
+                    <span class="badge {% if aluno.saldo_horas > 5 %}hours-full{% elif aluno.saldo_horas > 1 %}hours-medium{% else %}hours-low{% endif %}">
+                      {{ aluno.saldo_horas|floatformat:1 }}h
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge {% if aluno.ativo %}bg-success{% else %}bg-secondary{% endif %} status-badge">
+                      {{ aluno.ativo|yesno:"Ativo,Inativo" }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="d-flex gap-1 justify-content-center">
+                      
+                      <a href="#" class="btn-icon" title="Editar aluno" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editStudentModal" 
+                        data-aluno-id="{{ aluno.id }}"
+                        data-aluno-nome="{{ aluno.nome }}"
+                        data-aluno-sobrenome="{{ aluno.sobrenome }}"
+                        data-aluno-email="{{ aluno.email|default:'' }}"
+                        data-aluno-telefone="{{ aluno.telefone|default:'' }}"
+                        data-aluno-disciplina="{{ aluno.disciplina }}"
+                        data-aluno-horas="{{ aluno.horas_contratadas }}"
+                        data-aluno-dia-semana="{{ aluno.dia_semana|default:'' }}"
+                        data-aluno-horario-fixo="{{ aluno.horario_fixo|time:'H:i'|default:'' }}">
+                        <i class="bi bi-pencil-square"></i>
+                      </a>
+                      <a href="{% url 'historico_aluno' aluno.id %}" class="btn-icon" title="Histórico de Aulas">
+                        <i class="bi bi-clock-history"></i>
+                      </a>
+                      
+                      {% if aluno.ativo %}
+                      <a href="#" class="btn-icon text-warning" title="Desativar Aluno" data-bs-toggle="modal" data-bs-target="#deactivateModal"
+                        data-aluno-id="{{ aluno.id }}"
+                        data-aluno-nome="{{ aluno.nome }} {{ aluno.sobrenome }}">
+                        <i class="bi bi-pause-circle"></i>
+                      </a>
+                      {% else %}
+                      <a href="#" class="btn-icon text-success" title="Ativar Aluno" data-bs-toggle="modal" data-bs-target="#activateModal"
+                        data-aluno-id="{{ aluno.id }}"
+                        data-aluno-nome="{{ aluno.nome }} {{ aluno.sobrenome }}">
+                        <i class="bi bi-play-circle"></i>
+                      </a>
+                      {% endif %}
+                      
+                      <a href="#" class="btn-icon text-danger" title="Excluir Aluno" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-aluno-id="{{ aluno.id }}"
+                        data-aluno-nome="{{ aluno.nome }} {{ aluno.sobrenome }}">
+                        <i class="bi bi-trash"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if alunos.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if alunos.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ alunos.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for num in alunos.paginator.page_range %}
+              {% if alunos.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if alunos.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ alunos.next_page_number }}">Próxima</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </main>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Adicionar Novo Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'meus_alunos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_aluno">
+            
+            <div class="modal-body">
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+              </div>
+              {% endif %}
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="id_nome" class="form-label">Nome</label>
+                  <input type="text" name="nome" id="id_nome" class="form-control" required 
+                         placeholder="Nome do aluno" value="{{ form.nome.value|default:'' }}">
+                  {% if form.nome.errors %}
+                  <div class="text-danger small">{{ form.nome.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_sobrenome" class="form-label">Sobrenome</label>
+                  <input type="text" name="sobrenome" id="id_sobrenome" class="form-control" required 
+                         placeholder="Sobrenome do aluno" value="{{ form.sobrenome.value|default:'' }}">
+                  {% if form.sobrenome.errors %}
+                  <div class="text-danger small">{{ form.sobrenome.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label for="id_email" class="form-label">E-mail</label>
+                  <input type="email" name="email" id="id_email" class="form-control" 
+                         placeholder="email@exemplo.com" value="{{ form.email.value|default:'' }}">
+                  {% if form.email.errors %}
+                  <div class="text-danger small">{{ form.email.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label for="id_telefone" class="form-label">Telefone</label>
+                  <input type="tel" name="telefone" id="id_telefone" class="form-control" 
+                         placeholder="(11) 99999-9999" value="{{ form.telefone.value|default:'' }}">
+                  {% if form.telefone.errors %}
+                  <div class="text-danger small">{{ form.telefone.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_disciplina" class="form-label">Disciplina</label>
+                  <select name="disciplina" id="id_disciplina" class="form-select" required>
+                    <option value="">Selecione uma disciplina</option>
+                    {% for value, name in form.disciplina.field.choices %}
+                      {% if value != '' %}
+                      <option value="{{ value }}" {% if form.disciplina.value == value %}selected{% endif %}>
+                        {{ name }}
+                      </option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  {% if form.disciplina.errors %}
+                  <div class="text-danger small">{{ form.disciplina.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_horas_contratadas" class="form-label">Horas Contratadas</label>
+                  <input type="number" name="horas_contratadas" id="id_horas_contratadas" 
+                         class="form-control" required min="1" max="100" placeholder="10"
+                         value="{{ form.horas_contratadas.value|default:'' }}">
+                  {% if form.horas_contratadas.errors %}
+                  <div class="text-danger small">{{ form.horas_contratadas.errors }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label for="id_dia_semana" class="form-label">Dia da Aula (Fixo)</label>
+                  <select name="dia_semana" id="id_dia_semana" class="form-select">
+                    <option value="">Sem dia fixo</option>
+                    {% for value, name in form.dia_semana.field.choices %}
+                      {% if value != '' %}
+                        <option value="{{ value }}">{{ name }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="id_horario_fixo" class="form-label">Horário (Fixo)</label>
+                  <input type="time" name="horario_fixo" id="id_horario_fixo" class="form-control">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Cadastrar Aluno</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Editar Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'meus_alunos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit_aluno">
+            <input type="hidden" name="aluno_id" id="edit_aluno_id">
+            
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="edit_nome" class="form-label">Nome</label>
+                  <input type="text" name="nome" id="edit_nome" class="form-control" required 
+                        placeholder="Nome do aluno">
+                </div>
+                <div class="col-md-6">
+                  <label for="edit_sobrenome" class="form-label">Sobrenome</label>
+                  <input type="text" name="sobrenome" id="edit_sobrenome" class="form-control" required 
+                        placeholder="Sobrenome do aluno">
+                </div>
+                <div class="col-12">
+                  <label for="edit_email" class="form-label">E-mail</label>
+                  <input type="email" name="email" id="edit_email" class="form-control" 
+                        placeholder="email@exemplo.com">
+                </div>
+                <div class="col-12">
+                  <label for="edit_telefone" class="form-label">Telefone</label>
+                  <input type="tel" name="telefone" id="edit_telefone" class="form-control" 
+                        placeholder="(11) 99999-9999">
+                </div>
+                <div class="col-md-6">
+                  <label for="edit_disciplina" class="form-label">Disciplina</label>
+                  <select name="disciplina" id="edit_disciplina" class="form-select" required>
+                    <option value="">Selecione uma disciplina</option>
+                    {% for value, name in form.disciplina.field.choices %}
+                      {% if value != '' %}
+                      <option value="{{ value }}">{{ name }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="edit_horas_contratadas" class="form-label">Horas Contratadas</label>
+                  <input type="number" name="horas_contratadas" id="edit_horas_contratadas" 
+                        class="form-control" required min="1" max="100" placeholder="10">
+                  <div class="form-text text-info">
+                    <i class="bi bi-info-circle"></i>
+                    Alterar as horas contratadas atualizará automaticamente o saldo de horas.
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="edit_dia_semana" class="form-label">Dia da Aula (Fixo)</label>
+                  <select name="dia_semana" id="edit_dia_semana" class="form-select">
+                    <option value="">Sem dia fixo</option>
+                    {% for value, name in form.dia_semana.field.choices %}
+                      {% if value != '' %}
+                        <option value="{{ value }}">{{ name }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="edit_horario_fixo" class="form-label">Horário (Fixo)</label>
+                  <input type="time" name="horario_fixo" id="edit_horario_fixo" class="form-control">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deactivate Student Modal -->
+    <div class="modal fade" id="deactivateModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-warning">Desativar Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'meus_alunos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_status">
+            <input type="hidden" name="aluno_id" id="deactivate_aluno_id">
+            
+            <div class="modal-body">
+              <p>Tem certeza que deseja desativar o aluno <strong id="deactivate_aluno_nome"></strong>?</p>
+              <p class="text-muted small">O aluno não aparecerá mais nas listas de alunos ativos, mas permanecerá no sistema para consultas históricas.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-warning">Desativar Aluno</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activate Student Modal -->
+    <div class="modal fade" id="activateModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-success">Ativar Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'meus_alunos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_status">
+            <input type="hidden" name="aluno_id" id="activate_aluno_id">
+            
+            <div class="modal-body">
+              <p>Tem certeza que deseja ativar o aluno <strong id="activate_aluno_nome"></strong>?</p>
+              <p class="text-muted small">O aluno voltará a aparecer nas listas de alunos ativos.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success">Ativar Aluno</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Student Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-danger">Excluir Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'meus_alunos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_aluno">
+            <input type="hidden" name="aluno_id" id="delete_aluno_id">
+            
+            <div class="modal-body">
+              <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+              </div>
+              <p>Tem certeza que deseja excluir permanentemente o aluno <strong id="delete_aluno_nome"></strong>?</p>
+              <p class="text-muted small">Todos os dados do aluno, incluindo histórico de aulas, serão permanentemente removidos do sistema.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-danger">Excluir Permanentemente</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const footer = document.getElementById('footer');
+
+        menuToggle.addEventListener('click', function () {
+          sidebar.classList.toggle('collapsed');
+          mainContent.classList.toggle('expanded');
+          footer.classList.toggle('expanded');
+
+          const icon = menuToggle.querySelector('i');
+          if (sidebar.classList.contains('collapsed')) {
+            icon.classList.remove('bi-list');
+            icon.classList.add('bi-chevron-right');
+          } else {
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-list');
+          }
+        });
+
+        const searchInput = document.getElementById('searchInput');
+        const studentsTable = document.getElementById('studentsTable');
+        
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const rows = studentsTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+          
+          for (let row of rows) {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+          }
+        });
+
+        const filterItems = document.querySelectorAll('[data-filter]');
+        filterItems.forEach(item => {
+          item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const filter = this.getAttribute('data-filter');
+            const rows = studentsTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            for (let row of rows) {
+              if (filter === 'all') {
+                row.style.display = '';
+              } else if (filter === 'ativo' || filter === 'inativo') {
+                row.style.display = row.getAttribute('data-status') === filter ? '' : 'none';
+              } else {
+                row.style.display = row.getAttribute('data-disciplina') === filter ? '' : 'none';
+              }
+            }
+          });
+        });
+
+
+        document.getElementById('logout-link').addEventListener('click', function(event) {
+          event.preventDefault();                 
+          document.getElementById('logout-form').submit();
+        });
+
+        // Editar aluno Modal 
+        const editStudentModal = document.getElementById('editStudentModal');
+
+        editStudentModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          
+          if (button && button.hasAttribute('data-aluno-id')) {
+            const alunoId = button.getAttribute('data-aluno-id');
+            const alunoNome = button.getAttribute('data-aluno-nome');
+            const alunoSobrenome = button.getAttribute('data-aluno-sobrenome');
+            const alunoEmail = button.getAttribute('data-aluno-email');
+            const alunoTelefone = button.getAttribute('data-aluno-telefone');
+            const alunoDisciplina = button.getAttribute('data-aluno-disciplina');
+            const alunoHoras = button.getAttribute('data-aluno-horas');
+            const alunoDiaSemana = button.getAttribute('data-aluno-dia-semana');
+            const alunoHorarioFixo = button.getAttribute('data-aluno-horario-fixo');
+            
+            document.getElementById('edit_aluno_id').value = alunoId;
+            document.getElementById('edit_nome').value = alunoNome;
+            document.getElementById('edit_sobrenome').value = alunoSobrenome;
+            document.getElementById('edit_email').value = alunoEmail;
+            document.getElementById('edit_telefone').value = alunoTelefone;
+            document.getElementById('edit_disciplina').value = alunoDisciplina;
+            document.getElementById('edit_horas_contratadas').value = alunoHoras;
+            
+            // Adicionar campos novos
+            if (alunoDiaSemana) {
+              document.getElementById('edit_dia_semana').value = alunoDiaSemana;
+            }
+            
+            if (alunoHorarioFixo) {
+              // Formatar o horário para o input type="time"
+              const horarioFormatado = alunoHorarioFixo.substring(0, 5); // Pega apenas HH:MM
+              document.getElementById('edit_horario_fixo').value = horarioFormatado;
+            }
+          }
+        });
+
+        const deactivateModal = document.getElementById('deactivateModal');
+        deactivateModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          if (button) {
+            document.getElementById('deactivate_aluno_id').value = button.getAttribute('data-aluno-id');
+            document.getElementById('deactivate_aluno_nome').textContent = button.getAttribute('data-aluno-nome');
+          }
+        });
+
+        const activateModal = document.getElementById('activateModal');
+        activateModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          if (button) {
+            document.getElementById('activate_aluno_id').value = button.getAttribute('data-aluno-id');
+            document.getElementById('activate_aluno_nome').textContent = button.getAttribute('data-aluno-nome');
+          }
+        });
+
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          if (button) {
+            document.getElementById('delete_aluno_id').value = button.getAttribute('data-aluno-id');
+            document.getElementById('delete_aluno_nome').textContent = button.getAttribute('data-aluno-nome');
+          }
+        });
+
+        document.addEventListener('click', function (event) {
+          if (window.innerWidth <= 768) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickInsideMenuToggle = menuToggle.contains(event.target);
+
+            if (!isClickInsideSidebar && !isClickInsideMenuToggle && !sidebar.classList.contains('collapsed')) {
+              sidebar.classList.add('collapsed');
+              mainContent.classList.add('expanded');
+              footer.classList.add('expanded');
+              const icon = menuToggle.querySelector('i');
+              icon.classList.remove('bi-list');
+              icon.classList.add('bi-chevron-right');
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

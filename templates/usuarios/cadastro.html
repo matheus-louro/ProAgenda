@@ -11,17 +11,16 @@
     />
     <style>
       :root {
-        --primary-color: #2563eb; /* Azul vibrante moderno */
-        --secondary-color: #3b82f6; /* Azul mais claro */
-        --accent-color: #06b6d4; /* Azul ciano para destaque */
-        --dark-blue: #1e40af; /* Azul escuro */
-        --light-blue: #dbeafe; /* Azul muito claro */
+        --primary-color: #2563eb;
+        --secondary-color: #3b82f6;
+        --accent-color: #06b6d4;
+        --dark-blue: #1e40af;
+        --light-blue: #dbeafe;
         --text-color: #1f2937;
         --light-text-color: #f8fafc;
         --background-light: #f0f9ff;
         --background-white: #ffffff;
         --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-        --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
         --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -69,42 +68,6 @@
 
       .logo-icon {
         font-size: 2rem;
-      }
-
-      nav ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        gap: 1.5rem;
-      }
-
-      nav a {
-        color: var(--text-color);
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 1rem;
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-      }
-
-      nav a:hover {
-        background-color: var(--light-blue);
-        color: var(--primary-color);
-      }
-
-      nav a.btn-primary {
-        background: var(--gradient-primary);
-        color: var(--light-text-color);
-        font-weight: 600;
-        box-shadow: var(--shadow-sm);
-      }
-
-      nav a.btn-primary:hover {
-        background: var(--dark-blue);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
       }
 
       main {
@@ -195,6 +158,47 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
+      /* Estilos para checkboxes de disciplinas */
+      .disciplinas-container {
+        background-color: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .disciplinas-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+      }
+
+      .disciplina-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+      }
+
+      .disciplina-checkbox:hover {
+        background-color: #f3f4f6;
+      }
+
+      .disciplina-checkbox input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-color);
+      }
+
+      .disciplina-checkbox label {
+        font-weight: 400;
+        cursor: pointer;
+        margin-bottom: 0;
+      }
+
       button[type='submit'] {
         background: var(--gradient-primary);
         color: var(--light-text-color);
@@ -280,39 +284,8 @@
         color: var(--light-text-color);
       }
 
-      /* Animações */
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .form-container {
-        animation: fadeInUp 0.6s ease-out;
-      }
-
       /* Responsividade */
       @media (max-width: 768px) {
-        header {
-          flex-direction: column;
-          gap: 1rem;
-          padding: 1rem;
-        }
-
-        nav ul {
-          gap: 0.8rem;
-        }
-
-        nav a {
-          padding: 0.5rem 1rem;
-          font-size: 0.9rem;
-        }
-
         .form-container {
           padding: 2rem 1.5rem;
           max-width: 500px;
@@ -326,6 +299,10 @@
           grid-template-columns: 1fr;
           gap: 1rem;
         }
+
+        .disciplinas-checkboxes {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 480px) {
@@ -335,11 +312,6 @@
 
         .form-container h2 {
           font-size: 1.5rem;
-        }
-
-        .footer-links {
-          flex-direction: column;
-          gap: 1rem;
         }
       }
     </style>
@@ -387,12 +359,51 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group">
-              <label for="id_disciplinas">Disciplina</label>
-              {{ form.disciplinas }}
-              <div class="form-error">{{ form.disciplinas.errors }}</div>
+            <div class="form-group full-width">
+              <label for="id_email">E-mail</label>
+              <input
+                type="email"
+                name="email"
+                id="id_email"
+                required
+                value="{{ form.email.value|default:'' }}"
+              />
+              <div class="form-error">{{ form.email.errors }}</div>
             </div>
+          </div>
 
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Disciplinas</label>
+              <div class="disciplinas-container">
+                <div class="disciplinas-checkboxes">
+                  {% for value, name in form.fields.disciplinas.choices %}
+                  <div class="disciplina-checkbox">
+                    <input
+                      type="checkbox"
+                      name="disciplinas"
+                      id="disciplina_{{ forloop.counter }}"
+                      value="{{ value }}"
+                      {%
+                      if
+                      value
+                      in
+                      form.disciplinas.value
+                      %}checked{%
+                      endif
+                      %}
+                    />
+                    <label for="disciplina_{{ forloop.counter }}">{{ name }}</label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="form-error">{{ form.disciplinas.errors }}</div>
+              <small class="text-muted">Selecione uma ou mais disciplinas que você ensina</small>
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
               <label for="id_telefone">Telefone</label>
               <input
@@ -401,21 +412,10 @@
                 id="id_telefone"
                 required
                 value="{{ form.telefone.value|default:'' }}"
+                placeholder="(11) 99999-9999"
               />
               <div class="form-error">{{ form.telefone.errors }}</div>
             </div>
-          </div>
-
-          <div class="form-group full-width">
-            <label for="id_email">E-mail</label>
-            <input
-              type="email"
-              name="email"
-              id="id_email"
-              required
-              value="{{ form.email.value|default:'' }}"
-            />
-            <div class="form-error">{{ form.email.errors }}</div>
           </div>
 
           <div class="form-row">

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Histórico - {{ aluno.nome }} - ProAgenda</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <style>
+      .page-header {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        border-radius: 15px;
+      }
+      .stat-card {
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+      .aula-item {
+        border-left: 4px solid #2563eb;
+      }
+      .aluno-info-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bg-white shadow-sm sticky-top py-3">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'meus_alunos' %}" class="btn btn-outline-primary">
+              <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            <a
+              href="{% url 'dashboard' %}"
+              class="logo d-flex align-items-center gap-2 text-decoration-none"
+            >
+              <span>📚</span>
+              <span
+                class="fs-4"
+                style="
+                  font-family: 'Montserrat', sans-serif;
+                  font-weight: 700;
+                  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+                  -webkit-background-clip: text;
+                  background-clip: text;
+                  color: transparent;
+                "
+                >ProAgenda</span
+              >
+            </a>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="text-end">
+              <div class="fw-semibold">
+                Prof. {{ request.user.first_name }} {{ request.user.last_name }}
+              </div>
+              <small class="text-muted">{{ request.user.get_disciplinas_display }}</small>
+            </div>
+            <div
+              class="user-avatar rounded-circle"
+              style="
+                width: 45px;
+                height: 45px;
+                background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 600;
+              "
+            >
+              {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container-fluid py-4">
+      <section class="page-header text-white p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <div class="flex-grow-1">
+            <h1 class="h2 fw-bold mb-2">Histórico de Aulas</h1>
+
+            <div class="aluno-info-card">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h2 class="h3 fw-bold mb-1">
+                    {{ aluno.nome }} {{ aluno.sobrenome }}
+                    <span class="badge bg-light text-primary fs-6 ms-2">
+                      {{ aluno.get_disciplina_display }}
+                    </span>
+                  </h2>
+
+                  <div class="d-flex align-items-center gap-4 mt-3">
+                    {% if aluno.dia_semana is not None %}
+                    <div class="d-flex align-items-center gap-2">
+                      <div
+                        class="bg-white text-primary p-2 rounded-circle"
+                        style="width: 36px; height: 36px"
+                      >
+                        <i
+                          class="bi bi-calendar-check d-flex justify-content-center align-items-center h-100"
+                        ></i>
+                      </div>
+                      <div>
+                        <div class="text-white-75 small">Dia da Semana</div>
+                        <div class="fw-semibold">{{ aluno.get_dia_semana_display }}</div>
+                      </div>
+                    </div>
+
+                    {% if aluno.horario_fixo %}
+                    <div class="d-flex align-items-center gap-2">
+                      <div
+                        class="bg-white text-primary p-2 rounded-circle"
+                        style="width: 36px; height: 36px"
+                      >
+                        <i
+                          class="bi bi-clock d-flex justify-content-center align-items-center h-100"
+                        ></i>
+                      </div>
+                      <div>
+                        <div class="text-white-75 small">Horário</div>
+                        <div class="fw-semibold">{{ aluno.horario_fixo|time:"H:i" }}</div>
+                      </div>
+                    </div>
+                    {% endif %} {% else %}
+                    <div class="d-flex align-items-center gap-2">
+                      <div
+                        class="bg-white text-primary p-2 rounded-circle"
+                        style="width: 36px; height: 36px"
+                      >
+                        <i
+                          class="bi bi-calendar d-flex justify-content-center align-items-center h-100"
+                        ></i>
+                      </div>
+                      <div>
+                        <div class="text-white-75 small">Agendamento</div>
+                        <div class="fw-semibold">Horário flexível</div>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+          <div class="stat-card bg-white p-3 shadow-sm h-100">
+            <div class="d-flex align-items-center">
+              <div
+                class="stat-icon me-3"
+                style="
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 12px;
+                  background: #10b981;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 1.5rem;
+                  color: white;
+                "
+              >
+                <i class="bi bi-journal-check"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0">{{ total_aulas }}</h3>
+                <small class="text-muted">Total de Aulas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-card bg-white p-3 shadow-sm h-100">
+            <div class="d-flex align-items-center">
+              <div
+                class="stat-icon me-3"
+                style="
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 12px;
+                  background: #06b6d4;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 1.5rem;
+                  color: white;
+                "
+              >
+                <i class="bi bi-clock"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0">{{ total_horas|floatformat:1 }}h</h3>
+                <small class="text-muted">Horas Ministradas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-card bg-white p-3 shadow-sm h-100">
+            <div class="d-flex align-items-center">
+              <div
+                class="stat-icon me-3"
+                style="
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 12px;
+                  background: #f59e0b;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 1.5rem;
+                  color: white;
+                "
+              >
+                <i class="bi bi-alarm"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0">{{ horas_restantes|floatformat:1 }}h</h3>
+                <small class="text-muted">Saldo Restante</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-card bg-white p-3 shadow-sm h-100">
+            <div class="d-flex align-items-center">
+              <div
+                class="stat-icon me-3"
+                style="
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 12px;
+                  background: #2563eb;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 1.5rem;
+                  color: white;
+                "
+              >
+                <i class="bi bi-wallet2"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0">{{ aluno.horas_contratadas|floatformat:0 }}h</h3>
+                <small class="text-muted">Horas Contratadas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white shadow-sm rounded p-4">
+        <h3 class="h5 fw-bold mb-3">Registro de Aulas</h3>
+
+        {% if aulas %}
+        <div class="list-group">
+          {% for aula in aulas %}
+          <div class="list-group-item aula-item mb-2">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold mb-0">
+                    {{ aula.data_aula|date:"d/m/Y" }} {% if aula.hora_aula %}
+                    <span class="text-muted ms-2 fw-normal">
+                      <i class="bi bi-clock"></i> {{ aluno.horario_fixo|time:"H:i" }}
+                    </span>
+                    {% endif %}
+                  </h6>
+                  <span class="badge bg-primary">{{ aula.duracao|floatformat:1 }}h</span>
+                </div>
+                {% if aula.assunto %}
+                <p class="mb-2 text-muted">{{ aula.assunto }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-journal-x display-4 mb-3"></i>
+          <h5>Nenhuma aula registrada</h5>
+          <p>Este aluno ainda não possui aulas no histórico.</p>
+        </div>
+        {% endif %}
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

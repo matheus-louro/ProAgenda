@@ -7,6 +7,16 @@ from usuarios.models import Professor
 
 
 class Aluno(models.Model):
+    DIAS_SEMANA_CHOICES = [
+        (0, "Segunda-feira"),
+        (1, "Terça-feira"),
+        (2, "Quarta-feira"),
+        (3, "Quinta-feira"),
+        (4, "Sexta-feira"),
+        (5, "Sábado"),
+        (6, "Domingo"),
+    ]
+
     professor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -20,6 +30,16 @@ class Aluno(models.Model):
 
     disciplina = models.CharField(max_length=100, choices=Professor.DISCIPLINA_CHOICES)
 
+    dia_semana = models.IntegerField(
+        choices=DIAS_SEMANA_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Dia da semana da aula fixa",
+    )
+    horario_fixo = models.TimeField(
+        blank=True, null=True, help_text="Horário padrão da aula"
+    )
+
     horas_contratadas = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     saldo_horas = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     ativo = models.BooleanField(default=True)
@@ -27,7 +47,6 @@ class Aluno(models.Model):
     def __str__(self):
         return f"{self.nome} {self.sobrenome}"
 
-    # Garante que o saldo inicial seja igual ao contratado ao criar
     def save(self, *args, **kwargs):
         if self.pk is None and self.saldo_horas == 0.0:
             self.saldo_horas = self.horas_contratadas
@@ -41,6 +60,7 @@ class Aula(models.Model):
         related_name="aulas",
     )
     data_aula = models.DateField()
+    hora_aula = models.TimeField(blank=True, null=True)
     duracao = models.DecimalField(max_digits=4, decimal_places=2)
     assunto = models.TextField(blank=True, null=True)
     criada_em = models.DateTimeField(auto_now_add=True)

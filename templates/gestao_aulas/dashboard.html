@@ -208,6 +208,39 @@
         margin-left: 70px;
       }
 
+      /* Estilos para próximas aulas */
+      .date-badge {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+      }
+      
+      .date-badge .fw-bold {
+        font-size: 1.2rem;
+        line-height: 1.2;
+      }
+      
+      .date-badge small {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+
+      /* Badge colorido para saldo de horas */
+      .hours-badge-1 {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        color: white;
+      }
+      
+      .hours-badge-2 {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        color: white;
+      }
+      
+      .hours-badge-3 {
+        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        color: white;
+      }
+
       @media (max-width: 768px) {
         .sidebar {
           width: 0;
@@ -268,18 +301,13 @@
             <span class="nav-text">Dashboard</span>
             <span class="tooltip">Dashboard</span>
           </a>
-          <a href="{% url 'dashboard' %}" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded">
+          <a href="{% url 'meus_alunos' %}" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded ">
             <i class="bi bi-people-fill"></i>
             <span class="nav-text">Meus Alunos</span>
             <span class="tooltip">Meus Alunos</span>
           </a>
-          <a href="#" class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded">
-            <i class="bi bi-gear-fill"></i>
-            <span class="nav-text">Configurações</span>
-            <span class="tooltip">Configurações</span>
-          </a>
           <a href="{% url 'logout' %}" 
-            class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded" 
+            class="nav-item d-flex align-items-center gap-3 text-decoration-none text-dark py-2 px-3 rounded " 
             id="logout-link">
             <i class="bi bi-box-arrow-right"></i>
             <span class="nav-text">Sair</span>
@@ -332,11 +360,11 @@
             <div class="stat-card bg-white p-3 shadow-sm h-100">
               <div class="d-flex align-items-center">
                 <div class="stat-icon icon-pending me-3">
-                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <div>
-                  <h3 class="fw-bold mb-0">{{ aulas_pendentes }}</h3>
-                  <small class="text-muted">Aulas Pendentes</small>
+                  <h3 class="fw-bold mb-0">{{ alunos_saldo_baixo.count }}</h3>
+                  <small class="text-muted">Alunos com Saldo Baixo</small>
                 </div>
               </div>
             </div>
@@ -345,16 +373,52 @@
             <div class="stat-card bg-white p-3 shadow-sm h-100">
               <div class="d-flex align-items-center">
                 <div class="stat-icon icon-revenue me-3">
-                  <i class="bi bi-currency-dollar"></i>
+                  <i class="bi bi-calendar-check"></i>
                 </div>
                 <div>
-                  <h3 class="fw-bold mb-0">{{ receita_mes }}</h3>
-                  <small class="text-muted">Receita do Mês</small>
+                  <h3 class="fw-bold mb-0">{{ proximas_aulas.count }}</h3>
+                  <small class="text-muted">Próximas Aulas</small>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Alunos com Saldo Baixo (Alertas) -->
+        {% if alunos_saldo_baixo %}
+        <div class="alert alert-warning mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>Alunos com saldo baixo</strong>
+              <small class="text-muted ms-2">(menos de 2 horas restantes)</small>
+            </div>
+            <span class="badge bg-warning text-dark">{{ alunos_saldo_baixo.count }}</span>
+          </div>
+          
+          <div class="mt-3">
+            <div class="row g-2">
+              {% for aluno in alunos_saldo_baixo %}
+              <div class="col-md-4 col-6">
+                <div class="d-flex align-items-center justify-content-between p-2 border rounded bg-light">
+                  <div class="d-flex align-items-center">
+                    <div class="student-avatar me-2" style="width: 35px; height: 35px; font-size: 0.8rem;">
+                      {{ aluno.nome|first }}{{ aluno.sobrenome|first }}
+                    </div>
+                    <div>
+                      <div class="fw-semibold" style="font-size: 0.9rem;">{{ aluno.nome }} {{aluno.sobrenome}}</div>
+                    </div>
+                  </div>
+                  <span class="badge hours-badge-3">
+                    {{ aluno.saldo_horas|floatformat:1 }}h
+                  </span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
 
         <!-- Action Buttons -->
         <div class="d-flex gap-2 mb-4 flex-wrap">
@@ -368,95 +432,165 @@
           </button>
         </div>
 
-        <!-- Students Table -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 fw-bold mb-0">Meus Alunos</h2>
-          <span class="text-muted">{{ total_alunos_ativos }} aluno{{ total_alunos_ativos|pluralize:"s" }}</span>
-        </div>
-
-        <div class="students-table bg-white shadow-sm mb-4">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Aluno</th>
-                  <th>Disciplina</th>
-                  <th class="d-none d-md-table-cell">Horas Contratadas</th>
-                  <th class="d-none d-md-table-cell">Saldo de Horas</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for aluno in alunos %}
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="student-avatar">
-                        {{ aluno.nome|first }}{{ aluno.sobrenome|first }}
-                      </div>
-                      <div>
-                        <div class="fw-semibold">{{ aluno.nome }} {{ aluno.sobrenome }}</div>
-                        <small class="text-muted">{{ aluno.email|default:"Sem email" }}</small>
+        <!-- Próximas Aulas e Alunos lado a lado -->
+        <div class="row g-3 mb-4">
+          <!-- Coluna da esquerda: Próximas Aulas -->
+          <div class="col-lg-6">
+            <div class="bg-white shadow-sm rounded p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 fw-bold mb-0">Próximas Aulas</h2>
+                <span class="text-muted">{{ proximas_aulas.count }} agendada{{ proximas_aulas.count|pluralize:"s" }}</span>
+              </div>
+              
+              {% if proximas_aulas %}
+              <div class="list-group list-group-flush">
+                {% for aluno in proximas_aulas %}
+                <div class="list-group-item d-flex justify-content-between align-items-center border-0 py-3 px-0">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="date-badge bg-primary text-white rounded text-center p-2">
+                      <div class="fw-bold">
+                        {% if aluno.dia_semana == 0 %}Seg
+                        {% elif aluno.dia_semana == 1 %}Ter
+                        {% elif aluno.dia_semana == 2 %}Qua
+                        {% elif aluno.dia_semana == 3 %}Qui
+                        {% elif aluno.dia_semana == 4 %}Sex
+                        {% elif aluno.dia_semana == 5 %}Sáb
+                        {% elif aluno.dia_semana == 6 %}Dom
+                        {% endif %}
                       </div>
                     </div>
-                  </td>
-                  <td>{{ aluno.get_disciplina_display }}</td>
-                  <td class="d-none d-md-table-cell">{{ aluno.horas_contratadas|floatformat:0 }}h</td>
-                  <td class="d-none d-md-table-cell">
-                    <span class="badge hours-full">{{ aluno.saldo_horas|floatformat:1 }}h restantes</span>
-                  </td>
-                  <td>
-                    <div class="d-flex gap-1">
-                      <a href="#" class="btn-icon" title="Lançar aula" data-bs-toggle="modal" data-bs-target="#addAulaModal" data-aluno-id="{{ aluno.id }}" data-aluno-nome="{{ aluno.nome }} {{ aluno.sobrenome }}">
-                        <i class="bi bi-play-fill"></i>
-                      </a>
-                      <a href="#" class="btn-icon" title="Editar">
-                        <i class="bi bi-pencil"></i>
-                      </a>
-                      <a href="#" class="btn-icon" title="Histórico">
-                        <i class="bi bi-clock-history"></i>
-                      </a>
+                    <div>
+                      <div class="fw-semibold">{{ aluno.nome }} {{ aluno.sobrenome }}</div>
+                      <small class="text-muted">
+                        {% if aluno.horario_fixo %}
+                          {{ aluno.horario_fixo|time:"H:i" }}
+                        {% else %}
+                          Horário a combinar
+                        {% endif %}
+                      </small>
                     </div>
-                  </td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="5" class="text-center py-4 text-muted">
-                    Você ainda não cadastrou nenhum aluno. Clique em "Adicionar Aluno" para começar!
-                  </td>
-                </tr>
+                  </div>
+                  <span class="badge bg-light text-dark">{{ aluno.get_disciplina_display }}</span>
+                </div>
                 {% endfor %}
-              </tbody>
-            </table>
+              </div>
+              
+              {% if proximas_aulas.count == 0 %}
+              <div class="text-center text-muted py-5">
+                <i class="bi bi-calendar-x display-4 mb-3"></i>
+                <p>Nenhuma aula com horário fixo agendada</p>
+                <small class="text-muted">Defina dias e horários fixos para seus alunos</small>
+              </div>
+              {% endif %}
+              
+              {% else %}
+              <div class="text-center text-muted py-5">
+                <i class="bi bi-calendar-x display-4 mb-3"></i>
+                <p>Nenhuma aula com horário fixo agendada</p>
+                <small class="text-muted">Defina dias e horários fixos para seus alunos</small>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- Coluna da direita: Students Table -->
+          <div class="col-lg-6">
+            <div class="bg-white shadow-sm rounded p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 fw-bold mb-0">Meus Alunos</h2>
+                <span class="text-muted">{{ total_alunos_ativos }} aluno{{ total_alunos_ativos|pluralize:"s" }}</span>
+              </div>
+              
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Aluno</th>
+                      <th>Disciplina</th>
+                      <th class="text-end">Saldo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for aluno in alunos %}
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="student-avatar">
+                            {{ aluno.nome|first }}{{ aluno.sobrenome|first }}
+                          </div>
+                          <div>
+                            <div class="fw-semibold">{{ aluno.nome }}</div>
+                            <small class="text-muted">{{ aluno.sobrenome }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{{ aluno.get_disciplina_display|slice:":10" }}{% if aluno.get_disciplina_display|length > 10 %}...{% endif %}</td>
+                      <td class="text-end">
+                        {% if aluno.saldo_horas > 5 %}
+                        <span class="badge hours-badge-1">{{ aluno.saldo_horas|floatformat:1 }}h</span>
+                        {% elif aluno.saldo_horas > 2 %}
+                        <span class="badge hours-badge-2">{{ aluno.saldo_horas|floatformat:1 }}h</span>
+                        {% else %}
+                        <span class="badge hours-badge-3">{{ aluno.saldo_horas|floatformat:1 }}h</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="3" class="text-center py-4 text-muted">
+                        Você ainda não cadastrou nenhum aluno.
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Recent Classes -->
-        <h2 class="h4 fw-bold mb-3">Aulas Recentes</h2>
-        <div class="recent-classes bg-white shadow-sm rounded p-3">
+        <div class="bg-white shadow-sm rounded p-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 fw-bold mb-0">Aulas Recentes</h2>
+            <a href="#" class="btn btn-sm btn-outline-primary">Ver todas</a>
+          </div>
           
           {% if aulas_recentes %}
             <div class="list-group list-group-flush">
               {% for aula in aulas_recentes %}
-                <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                  <div>
-                    <div class="fw-semibold">{{ aula.aluno.nome }} {{ aula.aluno.sobrenome }}</div>
-                    <small class="text-muted">{{ aula.assunto|default:"Sem assunto" }} - {{ aula.duracao|floatformat:1 }}h</small>
+                <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap border-0 py-3 px-0">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="date-badge bg-light text-dark rounded text-center p-2">
+                      <div class="fw-bold">{{ aula.data_aula|date:"d" }}</div>
+                      <small>{{ aula.data_aula|date:"M" }}</small>
+                    </div>
+                    <div>
+                      <div class="fw-semibold">{{ aula.aluno.nome }} {{ aula.aluno.sobrenome }}</div>
+                      <small class="text-muted">{{ aula.assunto|default:"Sem assunto" }}</small>
+                    </div>
                   </div>
-                  <small class="text-muted">{{ aula.data_aula|date:"d/m/Y" }}</small>
+                  <div class="text-end">
+                    <div class="fw-bold">{{ aula.duracao|floatformat:1 }}h</div>
+                    <small class="text-muted">{{ aula.data_aula|date:"d/m/Y" }}</small>
+                  </div>
                 </div>
               {% endfor %}
             </div>
             
           {% else %}
-            <div class="text-center text-muted py-3">Nenhuma aula lançada ainda.</div>
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-journal-x display-4 mb-3"></i>
+              <p>Nenhuma aula lançada ainda.</p>
+              <small class="text-muted">Use o botão "Lançar Aula" para começar</small>
+            </div>
           {% endif %}
           
         </div>
       </main>
     </div>
 
-    <!-- Add Student Modal -->
+   <!-- Add Student Modal -->
     <div class="modal fade" id="addStudentModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -464,11 +598,10 @@
             <h5 class="modal-title fw-bold">Adicionar Novo Aluno</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          <form method="post" action="{% url 'dashboard' %}">
+          <form method="post" action="{% url 'meus_alunos' %}">
             {% csrf_token %}
-
             <input type="hidden" name="action" value="add_aluno">
-
+            
             <div class="modal-body">
               {% if form.non_field_errors %}
               <div class="alert alert-danger">
@@ -533,6 +666,23 @@
                   {% if form.horas_contratadas.errors %}
                   <div class="text-danger small">{{ form.horas_contratadas.errors }}</div>
                   {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label for="id_dia_semana" class="form-label">Dia da Aula (Fixo)</label>
+                  <select name="dia_semana" id="id_dia_semana" class="form-select">
+                    <option value="">Sem dia fixo</option>
+                    {% for value, name in form.dia_semana.field.choices %}
+                      {% if value != '' %}
+                        <option value="{{ value }}">{{ name }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="id_horario_fixo" class="form-label">Horário (Fixo)</label>
+                  <input type="time" name="horario_fixo" id="id_horario_fixo" class="form-control">
                 </div>
               </div>
             </div>
@@ -627,13 +777,10 @@
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
-        const footer = document.getElementById('footer');
 
-        // Menu toggle functionality
         menuToggle.addEventListener('click', function () {
           sidebar.classList.toggle('collapsed');
           mainContent.classList.toggle('expanded');
-          footer.classList.toggle('expanded');
 
           const icon = menuToggle.querySelector('i');
           if (sidebar.classList.contains('collapsed')) {
@@ -645,7 +792,6 @@
           }
         });
 
-        // Close menu when clicking outside (mobile)
         document.addEventListener('click', function (event) {
           if (window.innerWidth <= 768) {
             const isClickInsideSidebar = sidebar.contains(event.target);
@@ -654,7 +800,6 @@
             if (!isClickInsideSidebar && !isClickInsideMenuToggle && !sidebar.classList.contains('collapsed')) {
               sidebar.classList.add('collapsed');
               mainContent.classList.add('expanded');
-              footer.classList.add('expanded');
               const icon = menuToggle.querySelector('i');
               icon.classList.remove('bi-list');
               icon.classList.add('bi-chevron-right');
@@ -662,25 +807,21 @@
           }
         });
 
-        // Logout functionality
-        document.addEventListener('DOMContentLoaded', function() {
-          var logoutLink = document.getElementById('logout-link');
+        // Logout
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(event) {
+                event.preventDefault();                 
+                document.getElementById('logout-form').submit();
+            });
+        }
 
-          if (logoutLink) {
-              logoutLink.addEventListener('click', function(event) {
-                  event.preventDefault();                 
-                  document.getElementById('logout-form').submit();
-              });
-          }
-        });
-
-        // Aula Modal functionality
+        // Aula Modal
         const aulaModal = document.getElementById('addAulaModal');
         const alunoSelect = document.getElementById('id_aluno');
         const duracaoInput = document.getElementById('id_duracao');
         const saldoInfo = document.getElementById('saldo-info');
 
-        // Update saldo info when aluno is selected
         alunoSelect.addEventListener('change', function() {
           const selectedOption = this.options[this.selectedIndex];
           const saldo = selectedOption.getAttribute('data-saldo');
@@ -693,7 +834,6 @@
           }
         });
 
-        // Check saldo when duracao changes
         duracaoInput.addEventListener('input', function() {
           const selectedOption = alunoSelect.options[alunoSelect.selectedIndex];
           const saldo = parseFloat(selectedOption.getAttribute('data-saldo'));
@@ -710,23 +850,21 @@
           }
         });
 
-        // Pre-select aluno when opening modal from table action
+        // Pre-select aluno when opening modal from table
         aulaModal.addEventListener('show.bs.modal', function (event) {
           const button = event.relatedTarget;
           if (button && button.hasAttribute('data-aluno-id')) {
             const alunoId = button.getAttribute('data-aluno-id');
             const alunoNome = button.getAttribute('data-aluno-nome');
             
-            // Set the select value
             alunoSelect.value = alunoId;
             
-            // Trigger change event to update saldo info
             const event = new Event('change');
             alunoSelect.dispatchEvent(event);
           }
         });
 
-        // Set today's date as default for data_aula
+        // Set today's date as default
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('id_data_aula').value = today;
       });
